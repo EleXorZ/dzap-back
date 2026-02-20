@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * DTO pour créer un contact dans Brevo
+ * Basé sur : https://developers.brevo.com/docs/synchronise-contact-lists#create-a-contact
  */
 @Data
 @NoArgsConstructor
@@ -30,5 +31,14 @@ public class BrevoContactRequest {
     @JsonProperty("updateEnabled")
     @Builder.Default
     private Boolean updateEnabled = true;
+
+    @JsonProperty("emailBlacklisted")
+    @Builder.Default
+    private Boolean emailBlacklisted = false;
+
+    @JsonProperty("smsBlacklisted")
+    @Builder.Default
+    private Boolean smsBlacklisted = false;
 }
+
 

@@ -65,6 +65,8 @@ public class BrevoService {
                 .listIds(Arrays.asList(newsletterListId))
                 .attributes(attributes)
                 .updateEnabled(true)
+                .emailBlacklisted(false)
+                .smsBlacklisted(false)
                 .build();
 
             // Préparer les headers
