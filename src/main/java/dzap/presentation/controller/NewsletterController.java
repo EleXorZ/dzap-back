@@ -36,7 +36,8 @@ public class NewsletterController {
     @PostMapping("/subscribe")
     @Operation(summary = "S'inscrire à la newsletter", description = "Ajoute l'email à la liste de newsletter Brevo")
     public ResponseEntity<Map<String, Object>> subscribe(@Valid @RequestBody NewsletterSubscribeDTO request) {
-        log.info("Newsletter subscription request for email: {}", request.getEmail());
+        log.info("Newsletter subscription request for email: {}, firstName: {}, lastName: {}",
+            request.getEmail(), request.getFirstName(), request.getLastName());
 
         try {
             // Vérifier que Brevo est configuré

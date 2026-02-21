@@ -2,6 +2,7 @@ package dzap.application.service;
 
 import dzap.application.dto.brevo.BrevoContactRequest;
 import dzap.application.dto.brevo.BrevoContactResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class BrevoService {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${brevo.api-key:}")
     private String brevoApiKey;
@@ -47,26 +49,24 @@ public class BrevoService {
      * @return BrevoContactResponse avec l'ID du contact créé
      */
     public BrevoContactResponse createOrUpdateContact(String email, String firstName, String lastName) {
-        log.info("Creating/updating contact in Brevo: {}", email);
+        log.info("Creating/updating contact in Brevo: {} with firstName: {}, lastName: {}", email, firstName, lastName);
 
         try {
             // Préparer les attributs
-            Map<String, Object> attributes = new HashMap<>();
-            if (firstName != null && !firstName.isEmpty()) {
-                attributes.put("FNAME", firstName);
+            Map<String, String> attributes = new HashMap<>();
+            if (firstName != null && !firstName.trim().isEmpty()) {
+                attributes.put("PRENOM", firstName);
             }
-            if (lastName != null && !lastName.isEmpty()) {
-                attributes.put("LNAME", lastName);
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                attributes.put("NOM", lastName);
             }
 
-            // Créer la requête Brevo
+            // Créer la requête Brevo (format exact de la doc officielle)
             BrevoContactRequest request = BrevoContactRequest.builder()
                 .email(email)
-                .listIds(Arrays.asList(newsletterListId))
-                .attributes(attributes)
                 .updateEnabled(true)
-                .emailBlacklisted(false)
-                .smsBlacklisted(false)
+                .attributes(attributes)
+                .listIds(Arrays.asList(newsletterListId))
                 .build();
 
             // Préparer les headers
