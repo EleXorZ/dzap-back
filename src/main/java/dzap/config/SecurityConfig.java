@@ -54,6 +54,12 @@ public class SecurityConfig {
                 // Endpoints publics - Newsletter
                 .requestMatchers("/api/newsletter/**").permitAll()
 
+                // Endpoints publics - Quiz (sauf admin)
+                .requestMatchers("/api/quiz/questions", "/api/quiz/submit", "/api/quiz/result/**", "/api/quiz/health").permitAll()
+
+                // Endpoints Admin Quiz - Requiert le rôle ADMIN
+                .requestMatchers("/api/quiz/admin/**").hasRole("ADMIN")
+
                 // Endpoints Admin - Requiert le rôle ADMIN
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
