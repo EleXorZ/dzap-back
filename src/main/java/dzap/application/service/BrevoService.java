@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,15 +41,17 @@ public class BrevoService {
     private static final String CONTACTS_ENDPOINT = "/contacts";
 
     /**
-     * Crée ou met à jour un contact dans Brevo
+     * Crée ou met à jour un contact dans Brevo avec des listes spécifiques
      *
      * @param email Email du contact
      * @param firstName Prénom du contact
      * @param lastName Nom du contact
+     * @param listIds Liste des IDs de listes Brevo où ajouter le contact
      * @return BrevoContactResponse avec l'ID du contact créé
      */
-    public BrevoContactResponse createOrUpdateContact(String email, String firstName, String lastName) {
-        log.info("Creating/updating contact in Brevo: {} with firstName: {}, lastName: {}", email, firstName, lastName);
+    public BrevoContactResponse createOrUpdateContact(String email, String firstName, String lastName, List<Integer> listIds) {
+        log.info("Creating/updating contact in Brevo: {} with firstName: {}, lastName: {}, lists: {}",
+                email, firstName, lastName, listIds);
 
         try {
             // Préparer les attributs
@@ -66,7 +68,7 @@ public class BrevoService {
                 .email(email)
                 .updateEnabled(true)
                 .attributes(attributes)
-                .listIds(Arrays.asList(newsletterListId))
+                .listIds(listIds)
                 .build();
 
             // Préparer les headers
@@ -94,6 +96,25 @@ public class BrevoService {
             log.error("Error creating/updating contact in Brevo: {}", email, e);
             throw new RuntimeException("Failed to create contact in Brevo: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Inscrit un contact à la newsletter (liste par défaut)
+     *
+     * @param email Email du contact
+     * @param firstName Prénom du contact
+     * @param lastName Nom du contact
+     * @return BrevoContactResponse avec l'ID du contact créé
+     */
+    public BrevoContactResponse subscribeToNewsletter(String email, String firstName, String lastName) {
+        return createOrUpdateContact(email, firstName, lastName, List.of(newsletterListId));
+    }
+
+    /**
+     * Récupère l'ID de la liste newsletter
+     */
+    public Integer getNewsletterListId() {
+        return newsletterListId;
     }
 
     /**

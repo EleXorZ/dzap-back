@@ -47,7 +47,7 @@ public class NewsletterController {
             }
 
             // Créer/mettre à jour le contact dans Brevo
-            BrevoContactResponse response = brevoService.createOrUpdateContact(
+            BrevoContactResponse response = brevoService.subscribeToNewsletter(
                 request.getEmail(),
                 request.getFirstName(),
                 request.getLastName()

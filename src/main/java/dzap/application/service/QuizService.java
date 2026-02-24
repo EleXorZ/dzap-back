@@ -37,6 +37,14 @@ public class QuizService {
             "d'investissement immobilier les plus adaptées à votre situation.";
     private static final int ESTIMATED_TIME_MINUTES = 3;
 
+    // IDs des listes Brevo par profil d'investisseur
+    private static final Map<InvestorProfile, Integer> BREVO_LIST_IDS = Map.of(
+            InvestorProfile.PRUDENT, 9,
+            InvestorProfile.BALANCED, 10,
+            InvestorProfile.DYNAMIC, 11,
+            InvestorProfile.PATRIMONIAL, 12
+    );
+
     /**
      * Récupère toutes les questions actives du quizz
      */
@@ -98,10 +106,8 @@ public class QuizService {
         result = resultRepository.save(result);
         log.info("Quiz result saved with ID: {} for profile: {}", result.getId(), calculatedProfile);
 
-        // Gérer l'inscription newsletter si demandée
-        if (Boolean.TRUE.equals(request.getSubscribeNewsletter())) {
-            subscribeToNewsletter(request);
-        }
+        // Ajouter le contact dans Brevo (liste du profil + newsletter si demandé)
+        subscribeToBrevoLists(request, calculatedProfile);
 
         // Construire et retourner la réponse
         return buildResultResponse(result, scores);
@@ -247,19 +253,40 @@ public class QuizService {
         return strategies.stream().limit(3).collect(Collectors.toList());
     }
 
-    private void subscribeToNewsletter(QuizSubmitRequestDTO request) {
+    private void subscribeToBrevoLists(QuizSubmitRequestDTO request, InvestorProfile profile) {
         try {
-            if (brevoService.isConfigured()) {
-                brevoService.createOrUpdateContact(
-                        request.getEmail(),
-                        request.getFirstName(),
-                        request.getLastName()
-                );
-                log.info("User {} subscribed to newsletter via quiz", request.getEmail());
+            if (!brevoService.isConfigured()) {
+                log.warn("Brevo not configured, skipping contact creation");
+                return;
             }
+
+            // Construire la liste des IDs Brevo
+            List<Integer> listIds = new ArrayList<>();
+
+            // Toujours ajouter la liste du profil
+            Integer profileListId = BREVO_LIST_IDS.get(profile);
+            if (profileListId != null) {
+                listIds.add(profileListId);
+            }
+
+            // Ajouter la newsletter si demandé
+            if (Boolean.TRUE.equals(request.getSubscribeNewsletter())) {
+                listIds.add(brevoService.getNewsletterListId());
+            }
+
+            // Créer/mettre à jour le contact dans Brevo
+            brevoService.createOrUpdateContact(
+                    request.getEmail(),
+                    request.getFirstName(),
+                    request.getLastName(),
+                    listIds
+            );
+
+            log.info("User {} added to Brevo lists: {}", request.getEmail(), listIds);
+
         } catch (Exception e) {
-            log.error("Failed to subscribe user to newsletter: {}", request.getEmail(), e);
-            // Ne pas faire échouer le quizz si la newsletter échoue
+            log.error("Failed to add user to Brevo lists: {}", request.getEmail(), e);
+            // Ne pas faire échouer le quizz si Brevo échoue
         }
     }
 
