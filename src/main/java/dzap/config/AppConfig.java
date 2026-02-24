@@ -38,6 +38,7 @@ public class AppConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
+            "http://localhost:5177",
             "http://localhost:8080",
             "https://dezeroaproprio.com",
             "https://www.dezeroaproprio.com"
