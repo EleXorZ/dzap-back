@@ -46,6 +46,14 @@ public class QuizService {
     );
 
     /**
+     * Récupère le nombre de questions actives
+     */
+    @Transactional(readOnly = true)
+    public long getActiveQuestionsCount() {
+        return questionRepository.countByActiveTrue();
+    }
+
+    /**
      * Récupère toutes les questions actives du quizz
      */
     @Transactional(readOnly = true)

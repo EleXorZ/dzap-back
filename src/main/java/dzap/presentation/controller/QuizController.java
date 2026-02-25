@@ -120,6 +120,19 @@ public class QuizController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Récupère le nombre de questions actives
+     */
+    @GetMapping("/questions/count")
+    @Operation(summary = "Nombre de questions", description = "Retourne le nombre de questions actives du quizz")
+    public ResponseEntity<Map<String, Object>> getQuestionsCount() {
+        log.info("GET /api/quiz/questions/count - Fetching questions count");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", quizService.getActiveQuestionsCount());
+        return ResponseEntity.ok(response);
+    }
+
     // ==================== Admin endpoints ====================
 
     /**
